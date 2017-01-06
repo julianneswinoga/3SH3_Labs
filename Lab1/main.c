@@ -25,7 +25,7 @@ int main(void) {
 	if (signal(SIGALRM, signalHandler) ==  SIG_ERR ||
 	        signal(SIGINT, signalHandler) ==  SIG_ERR ||
 	        signal(SIGTSTP, signalHandler) ==  SIG_ERR) { //  register  the  signal  handler
-		printf ("Failed to register an alarm handler");
+		printf ("Failed to register a signal handler");
 		exit (1);
 	}
 
