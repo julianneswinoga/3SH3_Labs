@@ -11,12 +11,12 @@ void signalHandler(int  signo) {
 	}
 
 	if (signo  ==  SIGINT) {
-		printf ("CTRL+C pressed!\n");
+		printf ("\rCTRL+C pressed!\n");
 		return;
 	}
 
 	if (signo  ==  SIGTSTP) {
-		printf ("CTRL+Z pressed!\n");
+		printf ("\rCTRL+Z pressed!\n");
 		exit(0);
 	}
 }
