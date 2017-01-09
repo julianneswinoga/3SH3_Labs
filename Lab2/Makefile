@@ -1,4 +1,4 @@
-PROJECT = question2
+PROJECT = forks
 
 all: style $(PROJECT)
 
@@ -12,4 +12,4 @@ $(PROJECT).o: $(PROJECT).c
 	gcc -c $(PROJECT).c
 
 clean: $(PROJECT).o
-	rm $(PROJECT).o
+	rm $(PROJECT) $(PROJECT).o
