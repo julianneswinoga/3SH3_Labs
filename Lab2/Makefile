@@ -1,4 +1,4 @@
-PROJECT = forks
+PROJECT = main
 
 all: style $(PROJECT)
 
