@@ -28,8 +28,6 @@ int main (void) {
 
 		read(ptoc[0], readbuffer, sizeof(readbuffer));
 		printf("\nSum: %s\r\n", readbuffer);
-		//printf("Exit child\n");
-
 	} else { // Parent process
 		close(ctop[1]); // Close write pipe
 		close(ptoc[0]); // Close read pipe
@@ -42,9 +40,7 @@ int main (void) {
 		read(ctop[0], readbuffer, sizeof(readbuffer));
 
 		while (strcmp(readbuffer, "-1") != 0) {
-			nums[sumPos] = strtol(readbuffer, &endStr, 10);
-			sumPos++;
-			//printf("Received string: %s\n", readbuffer);
+			nums[sumPos++] = strtol(readbuffer, &endStr, 10);
 			read(ctop[0], readbuffer, sizeof(readbuffer));
 		}
 
@@ -54,7 +50,6 @@ int main (void) {
 
 		sprintf(writebuffer, "%i", sum);
 		write(ptoc[1], writebuffer, sizeof(writebuffer));
-		//printf("Exit parent\n");
 	}
 
 	return 0;
