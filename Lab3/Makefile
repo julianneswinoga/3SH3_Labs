@@ -1,5 +1,7 @@
 PROJECT = main
 
+CFLAGS = -std=c99 -pthread
+
 all: style $(PROJECT)
 
 style: $(PROJECT) ~/.astylerc
@@ -9,7 +11,7 @@ $(PROJECT): $(PROJECT).o
 	gcc $(PROJECT).o -o $(PROJECT)
 
 $(PROJECT).o: $(PROJECT).c
-	gcc -c $(PROJECT).c -std=c99
+	gcc -c $(PROJECT).c $(CFLAGS)
 
 clean: $(PROJECT).o
 	rm $(PROJECT) $(PROJECT).o
