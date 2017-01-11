@@ -15,9 +15,9 @@ int main(void) {
 
 	if (childpid == 0) { // Child process
 		int pageSize;
-
 		pageSize = getpagesize();
 		printf("Page size: %i", pageSize);
+
 	} else { // Parent process
 	}
 
