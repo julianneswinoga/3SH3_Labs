@@ -1,17 +1,17 @@
 PROJECT = main
 
-CFLAGS = -std=c99 -pthread
+CFLAGS = -std=c99 -pthread -lm
 
 all: style $(PROJECT)
 
-style: $(PROJECT) ~/.astylerc
+style: $(PROJECT).c ~/.astylerc
 	astyle $(PROJECT).c
 
 $(PROJECT): $(PROJECT).o
-	gcc $(PROJECT).o -o $(PROJECT)
+	gcc $(CFLAGS) $(PROJECT).o -o $(PROJECT)
 
 $(PROJECT).o: $(PROJECT).c
-	gcc -c $(PROJECT).c $(CFLAGS)
+	gcc $(CFLAGS) -c $(PROJECT).c
 
-clean: $(PROJECT).o
+clean:
 	rm $(PROJECT) $(PROJECT).o
