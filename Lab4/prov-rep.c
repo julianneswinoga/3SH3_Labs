@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 
-#define ALARM_TIME 2
+#define ALARM_TIME 10
 
 pid_t childpid;
 int pageSize;
@@ -33,8 +33,8 @@ void signalHandler(int  signo) {
 
 		for (int j = 0; j < numPages; j++) {
         if (j % 64 == 0)
-            printf("%s%10p: ", (j == 0) ? "" : "\n", res + (j * pageSize));
-        printf("%c", (vec[j] & 1) ? '*' : '.');
+            printf("%s%10p: ", j == 0 ? "" : "\n", res + (j * pageSize));
+        printf("%s", (vec[j] & 0x01) ? "In memory" : "Not in memory");
     }
     printf("\n");
 
