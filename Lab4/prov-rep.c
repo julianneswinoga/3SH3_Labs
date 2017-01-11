@@ -31,15 +31,15 @@ void signalHandler(int  signo) {
 			exit(1);
 		}
 
-		for (int j = 0; j < numPages; j++) {
-        if (j % 64 == 0)
-            printf("%s%10p: ", j == 0 ? "" : "\n", res + (j * pageSize));
-        printf("%s", (vec[j] & 0x01) ? "In memory" : "Not in memory");
-    }
-    printf("\n");
+		for (int i = 0; i < numPages; i++) {
+			if (i % 64 == 0)
+				printf("%s%10p: ", i == 0 ? "" : "\n", res + (i * pageSize));
 
-    free(vec);
+			printf("%s", (vec[i] & 0x01) ? "In memory" : "Not in memory");
+		}
 
+		printf("\n");
+		free(vec); // Free the vector that was allocated
 		printf("Page size: %i\n", pageSize);
 		alarm(ALARM_TIME); // Set up the next alarm
 	}
@@ -76,11 +76,9 @@ void main(void) {
 		int pageSize;
 		alarm(ALARM_TIME); // Set the initial alarm
 
-		while (1) { sleep(10); }
+		while (1) { sleep(10); } // Everything is triggered by the alarm signal
 
 	} else { // Parent process
-		printf("Parent process\n");
-
 		while (1) { sleep(10); }
 	}
 
