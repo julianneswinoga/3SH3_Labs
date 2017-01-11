@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
+#include "stdint.h"
 #include "pthread.h"
 
 #define FILE_DELIM " "
@@ -45,27 +46,28 @@ bool allThreadsComplete() {
 }
 
 void *meshThreadFunc(void *arg) {
-	printf("#%i Created\n", (int)arg);
+	printf("#%i Created\n", arg);
 	int arrayCopy[meshSize];
+	int threadNumber = (int)(uintptr_t)arg;
 
 	for (int phase = 0; phase <= ceil(log2(meshSize + 1.0)); phase++) {
 		if (phase % 2 == 0) { // Column sort
 			for (int i = 0; i < meshSize; i++)
-				arrayCopy[i] = data[i][(int)arg]; // Copy column data
+				arrayCopy[i] = data[i][threadNumber]; // Copy column data
 
 			bubblesort(arrayCopy, meshSize, false);
 			pthread_mutex_lock(&mutex_data);
 
 			for (int i = 0; i < meshSize; i++) // Write new column data
-				data[i][(int)arg] = arrayCopy[i];
+				data[i][threadNumber] = arrayCopy[i];
 
 			pthread_mutex_unlock(&mutex_data);
 
 		} else { // Row sort
 			for (int i = 0; i < meshSize; i++)
-				arrayCopy[i] = data[(int)arg][i]; // Copy row data
+				arrayCopy[i] = data[threadNumber][i]; // Copy row data
 
-			if ((int)arg % 2 == 0) { // Increasing from left to right
+			if (threadNumber % 2 == 0) { // Increasing from left to right
 				bubblesort(arrayCopy, meshSize, false);
 
 			} else { // Decreasing from left to right
@@ -75,13 +77,13 @@ void *meshThreadFunc(void *arg) {
 			pthread_mutex_lock(&mutex_data);
 
 			for (int i = 0; i < meshSize; i++) // Write new row data
-				data[(int)arg][i] = arrayCopy[i];
+				data[threadNumber][i] = arrayCopy[i];
 
 			pthread_mutex_unlock(&mutex_data);
 		}
 
-		printf("#%i done phase %i\n", (int)arg, phase);
-		threadWorkDone[(int)arg] = true;
+		printf("#%i done phase %i\n", threadNumber, phase);
+		threadWorkDone[threadNumber] = true;
 
 		if (!allThreadsComplete()) { // If not all threads are complete, wait
 			pthread_mutex_lock(&mutex_phaseComplete);
@@ -92,7 +94,7 @@ void *meshThreadFunc(void *arg) {
 			for (size_t i = 0; i < meshSize; i++)
 				threadWorkDone[i] = false; // Reset thread work
 
-			printf("#%i is the last thread!\n", (int)arg);
+			printf("#%i is the last thread!\n", threadNumber);
 			pthread_cond_broadcast(&condition_phaseComplete); // Broadcast that we can proceed
 		}
 	}
@@ -133,7 +135,7 @@ int main (void) {
 
 	for (int i = 0; i < meshSize; i++) { // Create $(meshSize) threads
 		threadIds[i] = i;
-		pthread_create(&threads[i], &attr, meshThreadFunc, (void*)threadIds[i]);
+		pthread_create(&threads[i], &attr, meshThreadFunc, (void*)(uintptr_t)threadIds[i]);
 	}
 
 	pthread_attr_destroy(&attr);
