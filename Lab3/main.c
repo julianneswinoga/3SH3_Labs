@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
-#include "stdint.h"
-#include "pthread.h"
+#include <stdint.h>
+#include <pthread.h>
 
 #define FILE_DELIM " "
 #define MAX_THREADS 16
