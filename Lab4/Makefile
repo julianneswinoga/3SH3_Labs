@@ -5,9 +5,6 @@ CFLAGS = -std=gnu99 -pthread -lm
 
 all: $(PROJECT1) $(PROJECT2)
 
-style: $(PROJECT1).c $(PROJECT2).c ~/.astylerc
-	astyle $(PROJECT1).c $(PROJECT2).c
-
 $(PROJECT1): $(PROJECT1).o
 	gcc $(CFLAGS) $(PROJECT1).o -o $(PROJECT1)
 

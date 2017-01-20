@@ -1,8 +1,5 @@
 all: style main
 
-style:
-	astyle main.c
-
 main: main.o
 	gcc main.o -o main
 

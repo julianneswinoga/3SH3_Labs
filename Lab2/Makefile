@@ -2,9 +2,6 @@ PROJECT = main
 
 all: style $(PROJECT)
 
-style: $(PROJECT) ~/.astylerc
-	astyle $(PROJECT).c
-
 $(PROJECT): $(PROJECT).o
 	gcc $(PROJECT).o -o $(PROJECT)
 
