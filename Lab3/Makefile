@@ -2,7 +2,7 @@ PROJECT = main
 
 CFLAGS = -std=c99 -pthread -lm
 
-all: style $(PROJECT)
+all: $(PROJECT)
 
 $(PROJECT): $(PROJECT).o
 	gcc $(CFLAGS) $(PROJECT).o -o $(PROJECT)
