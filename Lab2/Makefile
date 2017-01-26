@@ -1,6 +1,6 @@
 PROJECT = main
 
-all: style $(PROJECT)
+all: $(PROJECT)
 
 $(PROJECT): $(PROJECT).o
 	gcc $(PROJECT).o -o $(PROJECT)
