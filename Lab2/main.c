@@ -49,7 +49,7 @@ int main(void) {
 		uint8_t nums[256] = {
 			0,
 		};
-		int			 sum	= 0;
+		uint16_t	 sum	= 0;
 		unsigned int sumPos = 0;
 		read(ctop[0], readbuffer, sizeof(readbuffer));
 
