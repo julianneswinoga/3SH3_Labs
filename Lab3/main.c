@@ -48,7 +48,7 @@ bool allThreadsComplete() {
 }
 
 void *meshThreadFunc(void *arg) {
-	printf("#%i Created\n", arg);
+	printf("Thread #%i created\n", arg);
 	int arrayCopy[meshSize];
 	int threadNumber = (int)(uintptr_t)arg;
 
@@ -83,8 +83,6 @@ void *meshThreadFunc(void *arg) {
 
 			pthread_mutex_unlock(&mutex_data);
 		}
-
-		printf("#%i done phase %i\n", threadNumber, phase);
 		threadWorkDone[threadNumber] = true;
 
 		if (!allThreadsComplete()) { // If not all threads are complete, wait
@@ -98,7 +96,8 @@ void *meshThreadFunc(void *arg) {
 			for (size_t i		  = 0; i < meshSize; i++)
 				threadWorkDone[i] = false; // Reset thread work
 
-			printf("#%i is the last thread!\n", threadNumber);
+			printf("Phase %i:\n", phase + 1);
+			printData();
 			pthread_cond_broadcast(
 				&condition_phaseComplete); // Broadcast that we can proceed
 		}
@@ -133,6 +132,7 @@ int main(void) {
 		return 1;
 	}
 
+	printf("Unsorted matrix:\n");
 	printData();						   // Print unsorted data
 	pthread_mutex_init(&mutex_data, NULL); // Init mutex for data
 	pthread_mutex_init(&mutex_phaseComplete,
@@ -160,6 +160,7 @@ int main(void) {
 		}
 	}
 
+	printf("Sorted matrix:\n");
 	printData();						// Print sorted data
 	pthread_mutex_destroy(&mutex_data); // Destroy mutex
 	pthread_exit(NULL); // Wait for all threads to stop execution
