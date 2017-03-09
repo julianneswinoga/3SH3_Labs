@@ -1,7 +1,6 @@
 PROJECT = main
 
 CFLAGS = -std=c99 -pthread -lm
-CC = colorgcc
 
 all: $(PROJECT)
 
