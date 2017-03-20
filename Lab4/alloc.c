@@ -3,7 +3,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/ipc.h>
 #include <sys/mman.h>
+#include <sys/sem.h>
 #include <unistd.h>
 
 bool allocateResource(char **res, char type, char units) {

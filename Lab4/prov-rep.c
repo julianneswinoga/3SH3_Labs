@@ -5,12 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/ipc.h>
 #include <sys/mman.h>
 #include <sys/prctl.h>
+#include <sys/sem.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-#define ALARM_TIME 10
+#define ALARM_TIME (10)
+#define KEY (3141)
 
 pid_t childpid;
 char *res;
@@ -46,6 +49,7 @@ void signalHandler(int signo) {
 		printf("Page size: %i\n", pageSize);
 
 		printf("State of resources:\n%s\n", res);
+
 		alarm(ALARM_TIME); // Set up the next alarm
 	}
 }
@@ -70,14 +74,15 @@ int singleCharacter() {
 }
 
 void main(void) {
-	if (signal(SIGALRM, signalHandler) == SIG_ERR) { //  register  the  signal  handler
+	int  resourseFile, fileSize;
+	char resNum, numRes;
+
+	if (signal(SIGALRM, signalHandler) == SIG_ERR) { // Register  the  signal  handler
 		printf("Failed to register a signal handler");
 		exit(1);
 	}
 
-	int  resourseFile, fileSize;
-	char resNum, numRes;
-	resourseFile = open("res.txt", O_RDWR);
+	resourseFile = open("res.txt", O_RDWR); // File and memory mapping setup
 	fileSize     = lseek(resourseFile, 0, SEEK_END);
 
 	if (resourseFile == -1) {
@@ -105,6 +110,27 @@ void main(void) {
 			sleep(10); // Everything is triggered by the alarm signal
 
 	} else { // Parent process
+		struct sembuf operations[1];
+		int           semId;
+
+		union semun { // Semaphore setup
+			int              val;
+			struct semid_ds *buf;
+			ushort *         array;
+		} argument;
+
+		argument.val = 1;
+
+		if ((semId = semget(KEY, 1, 0666 | IPC_CREAT)) < 0) {
+			printf("Unable to obtain semaphore\n");
+			exit(1);
+		}
+
+		if (semctl(semId, 0, SETVAL, argument) < 0) { // Set the initial semaphore value to 1
+			printf("Cannot set semaphore value.\n");
+			exit(1);
+		}
+
 		while (1) {
 			printf("Provide more resources (y/n)? ");
 			if (singleCharacter() != 'y')
@@ -113,8 +139,22 @@ void main(void) {
 			resNum = singleCharacter();
 			numRes = singleCharacter();
 
+			operations[0].sem_num = 0;          // First semaphore
+			operations[0].sem_op  = -1;         // Decrement
+			operations[0].sem_flg = IPC_NOWAIT; //0
+			if (semop(semId, operations, 1) != 0) {
+				printf("Semaphore decrement operation failed\n");
+			}
+
 			if (!provideResource(&res, resNum, numRes))
 				printf("Resource providing failed\n");
+
+			operations[0].sem_num = 0;          // First semaphore
+			operations[0].sem_op  = 1;          // Increment
+			operations[0].sem_flg = IPC_NOWAIT; //0
+			if (semop(semId, operations, 1) != 0) {
+				printf("Semaphore decrement operation failed\n");
+			}
 
 			if (msync(res, fileSize, MS_SYNC) != 0) {
 				printf("Could not synchronize file data\n");
