@@ -46,8 +46,7 @@ void signalHandler(int signo) {
 }
 
 void main(void) {
-	if (signal(SIGALRM, signalHandler) ==
-	    SIG_ERR) { //  register  the  signal  handler
+	if (signal(SIGALRM, signalHandler) == SIG_ERR) { //  register  the  signal  handler
 		printf("Failed to register a signal handler");
 		exit(1);
 	}
@@ -61,8 +60,7 @@ void main(void) {
 		exit(1);
 	}
 
-	res = mmap((uintptr_t)0, pageSize, PROT_READ | PROT_WRITE, MAP_SHARED,
-	           resourseFile, 0);
+	res = mmap((uintptr_t)0, pageSize, PROT_READ | PROT_WRITE, MAP_SHARED, resourseFile, 0);
 
 	if (res == MAP_FAILED) {
 		printf("Memory map failed\n");
@@ -78,10 +76,12 @@ void main(void) {
 		int pageSize;
 		alarm(ALARM_TIME); // Set the initial alarm
 
-		while (1) { sleep(10); } // Everything is triggered by the alarm signal
+		while (1)
+			sleep(10); // Everything is triggered by the alarm signal
 
 	} else { // Parent process
-		while (1) { sleep(10); }
+		while (1)
+			sleep(10);
 	}
 
 	exit(0); // Exit all processes
