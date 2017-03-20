@@ -1,7 +1,7 @@
 PROJECT1 = alloc
 PROJECT2 = prov-rep
 
-CFLAGS = -std=gnu99 -pthread -lm
+CFLAGS = -std=gnu99 -lm
 
 all: $(PROJECT1) $(PROJECT2)
 
