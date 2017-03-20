@@ -8,6 +8,8 @@
 #include <sys/sem.h>
 #include <unistd.h>
 
+#define KEY (3141)
+
 bool allocateResource(char **res, char type, char units) {
 	for (int i = 0; (*res)[i] != 0; i++) {
 		if ((*res)[i] == type && (*res)[i + 1] == ' ') {
@@ -28,9 +30,27 @@ int singleCharacter() {
 }
 
 int main(void) {
-	int   resourseFile, fileSize;
-	char *res;
-	char  resNum, numRes;
+	struct sembuf lock_sops[2], release_sops[1];
+	int           resourseFile, fileSize, semId;
+	char *        res;
+	char          resNum, numRes;
+
+	if ((semId = semget(KEY, 1, 0666 | IPC_CREAT)) < 0) { // Get process semaphore
+		printf("Unable to obtain semaphore #%i\n", KEY);
+		exit(1);
+	}
+
+	lock_sops[0].sem_num = 0; // First semaphore
+	lock_sops[0].sem_op  = 0; // Wait for zero
+	lock_sops[0].sem_flg = 0; // Wait
+	lock_sops[1].sem_num = 0; // First semaphore
+	lock_sops[1].sem_op  = 1; // Increment
+	lock_sops[1].sem_flg = 0;
+
+	release_sops[0].sem_num = 0;  // First semaphore
+	release_sops[0].sem_op  = -1; // Decrement
+	release_sops[0].sem_flg = 0;  // Wait
+
 	resourseFile = open("res.txt", O_RDWR);
 	fileSize     = lseek(resourseFile, 0, SEEK_END);
 
@@ -54,6 +74,10 @@ int main(void) {
 		resNum = singleCharacter();
 		numRes = singleCharacter();
 
+		if (semop(semId, lock_sops, sizeof(lock_sops) / sizeof(struct sembuf)) != 0) {
+			printf("Semaphore wait and increment operation failed\n");
+		}
+
 		if (!allocateResource(&res, resNum, numRes))
 			printf("Resource allocation failed\n");
 
@@ -61,6 +85,8 @@ int main(void) {
 			printf("Could not synchronize file data\n");
 			exit(1);
 		}
+
+		semop(semId, release_sops, sizeof(release_sops) / sizeof(struct sembuf));
 	}
 
 	return 0;

@@ -110,7 +110,7 @@ void main(void) {
 			sleep(10); // Everything is triggered by the alarm signal
 
 	} else { // Parent process
-		struct sembuf operations[1];
+		struct sembuf lock_sops[2], release_sops[1];
 		int           semId;
 
 		union semun { // Semaphore setup
@@ -119,10 +119,10 @@ void main(void) {
 			ushort *         array;
 		} argument;
 
-		argument.val = 1;
+		argument.val = 0; // Set initial semaphore value to zero
 
 		if ((semId = semget(KEY, 1, 0666 | IPC_CREAT)) < 0) {
-			printf("Unable to obtain semaphore\n");
+			printf("Unable to obtain semaphore #%i\n", KEY);
 			exit(1);
 		}
 
@@ -130,6 +130,17 @@ void main(void) {
 			printf("Cannot set semaphore value.\n");
 			exit(1);
 		}
+
+		lock_sops[0].sem_num = 0; // First semaphore
+		lock_sops[0].sem_op  = 0; // Wait for zero
+		lock_sops[0].sem_flg = 0; // Wait
+		lock_sops[1].sem_num = 0; // First semaphore
+		lock_sops[1].sem_op  = 1; // Increment
+		lock_sops[1].sem_flg = 0;
+
+		release_sops[0].sem_num = 0;  // First semaphore
+		release_sops[0].sem_op  = -1; // Decrement
+		release_sops[0].sem_flg = 0;  // Wait
 
 		while (1) {
 			printf("Provide more resources (y/n)? ");
@@ -139,27 +150,19 @@ void main(void) {
 			resNum = singleCharacter();
 			numRes = singleCharacter();
 
-			operations[0].sem_num = 0;          // First semaphore
-			operations[0].sem_op  = -1;         // Decrement
-			operations[0].sem_flg = IPC_NOWAIT; //0
-			if (semop(semId, operations, 1) != 0) {
-				printf("Semaphore decrement operation failed\n");
+			if (semop(semId, lock_sops, sizeof(lock_sops) / sizeof(struct sembuf)) != 0) {
+				printf("Semaphore wait and increment operation failed\n");
 			}
 
 			if (!provideResource(&res, resNum, numRes))
 				printf("Resource providing failed\n");
 
-			operations[0].sem_num = 0;          // First semaphore
-			operations[0].sem_op  = 1;          // Increment
-			operations[0].sem_flg = IPC_NOWAIT; //0
-			if (semop(semId, operations, 1) != 0) {
-				printf("Semaphore decrement operation failed\n");
-			}
-
 			if (msync(res, fileSize, MS_SYNC) != 0) {
 				printf("Could not synchronize file data\n");
 				exit(1);
 			}
+
+			semop(semId, release_sops, sizeof(release_sops) / sizeof(struct sembuf));
 		}
 	}
 
